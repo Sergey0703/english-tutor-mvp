@@ -1,0 +1,33 @@
+# =====================================
+# LiveKit Gemini Voice Agent - MVP
+# Минимальный набор для Hugging Face Spaces
+# =====================================
+
+# ---- CORE LIVEKIT PACKAGES ----
+livekit-agents==1.2.4
+livekit-plugins-google==1.2.3
+livekit-plugins-silero==1.2.3
+livekit-api==1.0.5
+livekit==1.0.12
+
+# ---- GOOGLE AI / GEMINI ----
+google-genai==1.28.0
+google-auth==2.40.3
+google-api-core==2.25.1
+
+# ---- WEB & HTTP (для LiveKit) ----
+aiohttp==3.12.15
+websockets==15.0.1
+
+# ---- MEDIA PROCESSING ----
+pillow==11.3.0
+
+# ---- SYSTEM & UTILITIES ----
+packaging==25.0
+setuptools==80.9.0
+
+# =====================================
+# ВАЖНО: Это МИНИМАЛЬНЫЙ набор для MVP!
+# Без N8N, без Tavily, без email tools
+# Только LiveKit + Gemini + Hardcoded текст
+# =====================================
