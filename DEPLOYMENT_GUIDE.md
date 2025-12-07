@@ -87,17 +87,17 @@ git push space main
 
 ### LIVEKIT_API_KEY
 - Name: `LIVEKIT_API_KEY`
-- Value: `APICpeSck5jt2Rm`
+- Value: ``
 - Нажмите **"Add"**
 
 ### LIVEKIT_API_SECRET
 - Name: `LIVEKIT_API_SECRET`
-- Value: `t4jZk0X3wGLvLAwh0d4iigxmrWLkrdEsmwe7FkDVYLT`
+- Value: ``
 - Нажмите **"Add"**
 
 ### GOOGLE_API_KEY
 - Name: `GOOGLE_API_KEY`
-- Value: `AIzaSyAl-tyw_n8fKEnBO87_BINP1EHPaUeHhrg`
+- Value: ``
 - Нажмите **"Add"**
 
 ## Шаг 4: Мониторинг Сборки
