@@ -23,6 +23,9 @@ websockets==15.0.1
 # ---- MEDIA PROCESSING ----
 pillow==11.3.0
 
+# ---- RSS PARSING ----
+feedparser==6.0.11
+
 # ---- SYSTEM & UTILITIES ----
 packaging==25.0
 setuptools==80.9.0
