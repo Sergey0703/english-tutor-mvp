@@ -1,31 +1,31 @@
-import asyncio
 import logging
 import os
 from datetime import datetime
 from aiohttp import web
-from livekit import agents
+import asyncio
 from livekit.agents import (
     Agent,
     AgentSession,
     JobContext,
     RoomInputOptions,
     WorkerOptions,
+    cli,
 )
 from livekit.plugins import google
 
-# ========== ЛОГИРОВАНИЕ (для Hugging Face Spaces) ==========
+# ========== ЛОГИРОВАНИЕ ==========
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()]  # HF Spaces захватывает stdout
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger("english-tutor")
 
 # ========== ВАЛИДАЦИЯ КЛЮЧЕЙ ==========
 google_api_key = os.getenv("GOOGLE_API_KEY")
 if not google_api_key:
-    logger.error("❌ GOOGLE_API_KEY не найден в переменных окружения")
-    raise ValueError("GOOGLE_API_KEY обязателен для работы")
+    logger.error("❌ GOOGLE_API_KEY не найден")
+    raise ValueError("GOOGLE_API_KEY обязателен")
 
 logger.info("✅ Google API Key найден")
 
@@ -69,16 +69,14 @@ class EnglishTutorAgent(Agent):
     def __init__(self) -> None:
         super().__init__(
             instructions=AGENT_INSTRUCTION,
-
-            # LLM внутри Agent (Agent-LLM архитектура)
             llm=google.beta.realtime.RealtimeModel(
                 model="gemini-live-2.5-flash-preview",
-                voice="Aoede",  # Женский голос
+                voice="Aoede",
                 temperature=0.7,
                 api_key=google_api_key,
             ),
         )
-        logger.info("✅ EnglishTutorAgent инициализирован (Gemini Realtime Model)")
+        logger.info("✅ EnglishTutorAgent инициализирован")
 
 # ========== ОБРАБОТЧИКИ СОБЫТИЙ ==========
 def setup_session_events(session: AgentSession):
@@ -107,11 +105,11 @@ def setup_session_events(session: AgentSession):
 
     logger.info("✅ Event handlers configured")
 
-# ========== HTTP HEALTH ENDPOINT (для предотвращения засыпания HF Spaces) ==========
+# ========== HTTP HEALTH ENDPOINT ==========
 agent_start_time = datetime.now()
 
 async def health_check(request):
-    """Health check endpoint для мониторинга и keep-alive"""
+    """Health check endpoint"""
     uptime = datetime.now() - agent_start_time
     return web.json_response({
         "status": "healthy",
@@ -122,10 +120,10 @@ async def health_check(request):
     })
 
 async def start_health_server():
-    """Запуск HTTP сервера на порту 7860 (стандарт HF Spaces)"""
+    """Запуск HTTP сервера на порту 7860"""
     app = web.Application()
     app.router.add_get('/health', health_check)
-    app.router.add_get('/', health_check)  # Root тоже отдает health
+    app.router.add_get('/', health_check)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -136,50 +134,36 @@ async def start_health_server():
 # ========== MAIN ENTRYPOINT ==========
 async def entrypoint(ctx: JobContext):
     """Точка входа агента"""
+    logger.info("🚀 Starting English Tutor Agent")
 
-    logger.info("🚀 Starting English Tutor Agent (MVP - Hardcoded Text)")
-
-    # Создаем пустую сессию (LLM живет в Agent)
     session = AgentSession()
-
-    # Настраиваем события
     setup_session_events(session)
 
-    # Запускаем сессию с видео поддержкой
     await session.start(
         room=ctx.room,
         agent=EnglishTutorAgent(),
         room_input_options=RoomInputOptions(
-            video_enabled=True,  # Включаем видео
+            video_enabled=True,
         ),
     )
 
-    # Подключаемся к комнате
     await ctx.connect()
-
     logger.info("✅ Agent connected to LiveKit room")
 
-    # Начальное приветствие и чтение текста урока
     try:
         await session.generate_reply(instructions=SESSION_INSTRUCTION)
-        logger.info("✅ Initial greeting and lesson text delivered")
+        logger.info("✅ Initial greeting delivered")
     except Exception as e:
         logger.warning(f"⚠️ Greeting failed: {e}")
 
-    logger.info("🎙️ English Tutor Agent ready for conversation")
-    logger.info(f"📖 Lesson Topic: AI in the workplace")
+    logger.info("🎙️ Agent ready")
 
 # ========== MAIN ==========
 if __name__ == "__main__":
-    # Запускаем HTTP health сервер в фоновом потоке
-    async def run_with_health_server():
-        # Стартуем health сервер
-        await start_health_server()
+    # Запускаем health сервер в фоне перед cli.run_app
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(start_health_server())
 
-        # Запускаем LiveKit CLI (блокирующий вызов)
-        # Используем worker для запуска entrypoint при подключении
-        from livekit.agents import Worker
-        worker = Worker(WorkerOptions(entrypoint_fnc=entrypoint))
-        await worker.run()
-
-    asyncio.run(run_with_health_server())
+    # Запускаем LiveKit CLI (стандартный способ)
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
