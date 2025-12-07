@@ -48,6 +48,10 @@ logs/
 *~
 .DS_Store
 
+# Claude Code
+.claude/
+claude.md
+
 # Jupyter Notebooks
 .ipynb_checkpoints
 
