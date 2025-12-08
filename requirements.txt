@@ -36,6 +36,7 @@ dnspython==2.7.0
 # ---- SYSTEM & UTILITIES ----
 packaging==25.0
 setuptools==80.9.0
+python-dotenv==1.0.1
 
 # =====================================
 # ВАЖНО: Это МИНИМАЛЬНЫЙ набор для MVP!

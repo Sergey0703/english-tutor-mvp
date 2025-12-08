@@ -6,6 +6,10 @@ import logging
 from typing import List, Dict, Optional
 from pymongo import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Загружаем .env файл
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
