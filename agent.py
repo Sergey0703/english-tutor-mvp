@@ -12,7 +12,6 @@ from livekit.agents import (
     cli,
 )
 from livekit.plugins import google
-from pymongo import MongoClient
 
 # ========== ЛОГИРОВАНИЕ ==========
 logging.basicConfig(
@@ -29,37 +28,6 @@ if not google_api_key:
     raise ValueError("GOOGLE_API_KEY is required")
 
 logger.info("Google API Key found")
-
-# ========== MONGODB CONFIGURATION ==========
-MONGODB_URI = os.getenv("MONGODB_URI")
-MONGODB_DB = os.getenv("MONGODB_DB", "cluster0")
-MONGODB_COLLECTION = os.getenv("MONGODB_COLLECTION", "words")
-
-def get_vocabulary_words(count: int = 5):
-    """Get random untrained words from MongoDB vocabulary"""
-    if not MONGODB_URI:
-        logger.warning("MongoDB not configured, skipping vocabulary")
-        return []
-
-    try:
-        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=10000)
-        db = client[MONGODB_DB]
-        collection = db[MONGODB_COLLECTION]
-
-        # Get untrained words
-        words = list(collection.find({"traini": False}).limit(count))
-
-        # Convert ObjectId to string
-        for word in words:
-            if "_id" in word:
-                word["_id"] = str(word["_id"])
-
-        client.close()
-        logger.info(f"Retrieved {len(words)} vocabulary words from MongoDB")
-        return words
-    except Exception as e:
-        logger.error(f"Failed to get vocabulary words: {e}")
-        return []
 
 # ========== N8N WEBHOOK CONFIGURATION ==========
 N8N_WEBHOOK_URL = os.getenv("N8N_WEBHOOK_URL", "http://localhost:5678/webhook/get-news")
