@@ -24,4 +24,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 7860
 
 # ========== START AGENT ==========
-CMD ["python", "agent.py", "start"]
+CMD ["python", "agent.py"]
